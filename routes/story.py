@@ -1,3 +1,4 @@
+import time
 from flask import Blueprint, request, jsonify
 from services.openai_handler import generate_story
 from services.dalle_handler import generate_image
@@ -13,6 +14,7 @@ def story_route():
 
     if os.getenv("DEV_MODE") == "1":
         context = context[-6:] if len(context) > 6 else context
+        time.sleep(10)  #  Simulate loading delay for image
 
     logging.info(f"[STORY] User input: {user_input}")
     story_response = generate_story(user_input, context)
@@ -25,8 +27,11 @@ def story_route():
 def image_route():
     try:
         prompt = request.json.get("prompt", "")
-        logging.info(f"[IMAGE] Prompt: {prompt}")
 
+        if os.getenv("DEV_MODE") == "1":
+            time.sleep(10)  # Simulate loading delay for image
+
+        logging.info(f"[IMAGE] Prompt: {prompt}")
         image_url = generate_image(prompt)
         logging.info(f"[IMAGE] URL: {image_url}")
 
@@ -34,3 +39,4 @@ def image_route():
     except Exception as e:
         logging.error(f"[IMAGE] Error: {e}")
         return jsonify({"error": str(e)}), 500
+
