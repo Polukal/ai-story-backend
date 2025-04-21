@@ -2,12 +2,14 @@ import time
 from flask import Blueprint, request, jsonify
 from services.openai_handler import generate_story
 from services.dalle_handler import generate_image
+from flask_jwt_extended import jwt_required
 import logging
 import os
 
 story_bp = Blueprint("story", __name__)
 
 @story_bp.route("/generate_story", methods=["POST"])
+@jwt_required()
 def story_route():
     user_input = request.json.get("message")
     context = request.json.get("context", [])
@@ -24,6 +26,7 @@ def story_route():
 
 
 @story_bp.route("/generate_image", methods=["POST"])
+@jwt_required()
 def image_route():
     try:
         prompt = request.json.get("prompt", "")

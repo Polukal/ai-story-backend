@@ -1,10 +1,8 @@
 import os
 from openai import OpenAI
-from dotenv import load_dotenv
 from utils.sanitize import sanitize_prompt
 
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI()
 
 def generate_image(prompt):
     if os.getenv("DEV_MODE") == "1":
