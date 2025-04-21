@@ -60,3 +60,9 @@ def profile():
         "last_name": user.last_name,
         "phone": user.phone,
     })
+
+@auth_bp.route("/check", methods=["GET"])
+@jwt_required()
+def check_auth():
+    return jsonify({"logged_in": True}), 200
+
