@@ -4,6 +4,7 @@ from flask_jwt_extended import JWTManager
 from models.user import db, bcrypt
 from routes.auth import auth_bp
 from routes.story import story_bp
+from routes.stripe import stripe_bp
 from config import Config
 import logging
 import time
@@ -38,6 +39,7 @@ JWTManager(app)
 # Register Blueprints
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(story_bp, url_prefix="/api")
+app.register_blueprint(stripe_bp, url_prefix="/api/payment")
 
 # Retry DB connection on startup (max 10 attempts)
 MAX_RETRIES = 10

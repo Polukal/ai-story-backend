@@ -12,6 +12,7 @@ class User(db.Model):
     last_name = db.Column(db.String(80))
     phone = db.Column(db.String(20))
     password_hash = db.Column(db.String(128), nullable=False)
+    credits = db.Column(db.Integer, default=0)
 
     def set_password(self, password):
         self.password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
