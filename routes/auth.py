@@ -59,6 +59,7 @@ def profile():
         "first_name": user.first_name,
         "last_name": user.last_name,
         "phone": user.phone,
+        "credits": user.credits
     })
 
 @auth_bp.route("/check", methods=["GET"])
