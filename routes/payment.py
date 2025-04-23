@@ -1,4 +1,6 @@
 
+# TODO: Connect the frontend payment request to this flask backend before sending to stripe
+#These endpoints are not currently being used.
 import os
 import stripe
 from flask import Blueprint, request, jsonify
