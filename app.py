@@ -6,6 +6,7 @@ from routes.auth import auth_bp
 from routes.story import story_bp
 from routes.stripe import stripe_bp
 from routes.storytellers import storyteller_bp
+from routes.characters import character_bp
 from config import Config
 import logging
 import time
@@ -42,6 +43,7 @@ app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(story_bp, url_prefix="/api")
 app.register_blueprint(stripe_bp, url_prefix="/api/payment")
 app.register_blueprint(storyteller_bp)
+app.register_blueprint(character_bp)
 
 # Retry DB connection on startup (max 10 attempts)
 MAX_RETRIES = 10
