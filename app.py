@@ -1,10 +1,11 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from models.user import db, bcrypt
+from db import db, bcrypt  # ✅ Use this shared db instance
 from routes.auth import auth_bp
 from routes.story import story_bp
 from routes.stripe import stripe_bp
+from routes.storytellers import storyteller_bp
 from config import Config
 import logging
 import time
@@ -40,6 +41,7 @@ JWTManager(app)
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(story_bp, url_prefix="/api")
 app.register_blueprint(stripe_bp, url_prefix="/api/payment")
+app.register_blueprint(storyteller_bp)
 
 # Retry DB connection on startup (max 10 attempts)
 MAX_RETRIES = 10
