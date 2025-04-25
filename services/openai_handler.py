@@ -13,8 +13,8 @@ def generate_story(user_input, context=[]):
         model=os.getenv("OPENAI_MODEL", "gpt-4"),
         messages=messages,
         temperature=0.85,
-        max_tokens=800,
-        stop=None  # Optional: customize stopping behavior
+        max_tokens=600,
+        stop=None
     )
 
     print(f"[GPT] Tokens used: {response.usage.total_tokens}")
