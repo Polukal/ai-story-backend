@@ -10,7 +10,7 @@ def generate_story(user_input, context=[]):
     messages = context + [{"role": "user", "content": user_input}]
 
     response = client.chat.completions.create(
-        model=os.getenv("OPENAI_MODEL", "gpt-4"),
+        model=os.getenv("OPENAI_MODEL", "gpt-4.1-nano"),
         messages=messages,
         temperature=0.85,
         max_tokens=600,

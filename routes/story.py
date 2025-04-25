@@ -5,6 +5,10 @@ from services.dalle_handler import generate_image
 from flask_jwt_extended import jwt_required
 import logging
 import os
+from flask_jwt_extended import get_jwt_identity
+from models.user import User
+from db import db
+
 
 story_bp = Blueprint("story", __name__)
 
@@ -22,11 +26,28 @@ def story_route():
     print(f"storyteller: {storyteller}")
     print(f"character: {character}")
 
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # ✅ Only charge credits on story start
+    is_start = storyteller and character
+    required_credits = 5 if is_start else 0
+
+    if user.credits < required_credits:
+        return jsonify({"error": "Insufficient credits"}), 403
+
+    if is_start:
+        user.credits -= required_credits
+        db.session.commit()
+
     if os.getenv("DEV_MODE") == "1":
         context = context[-6:] if len(context) > 6 else context
         time.sleep(10)
 
-    if storyteller and character:
+    if is_start:
         master_prompt = f"""
 You are the narrator of a cinematic and immersive RPG story.
 
@@ -41,21 +62,25 @@ The player’s:
 
 Start the story with a dramatic, grounded scene based on the character’s backstory and the world’s current tension. Present a vivid moment of conflict or choice.
 
-**Important: Always refer to the player as “you”. Never use their name. Avoid cultural bias. Keep responses cinematic, emotionally immersive, and under 200 words.**
-
-At the end of each scene, present 2–3 clear open-ended choices the player can pick from.
+**Important formatting instructions:**
+- Always refer to the player as “you”. Never use their name.
+- Avoid cultural bias.
+- Keep responses cinematic, emotionally immersive, and under 200 words.
+- At the end of each scene, present 2–3 clear open-ended choices.
+- Each choice must be on a new line and start with a number followed by a period. Example:  
+  1. ...
+  2. ...
+  3. ...
 
 Ready? Begin the story.
 """.strip()
-
         prompt_to_send = master_prompt
         context = []
     else:
-        # Follow-up input with clear AI continuation guidance
         prompt_to_send = f"""{user_input.strip()}
 
 Continue the story in second-person (“you”) with cinematic detail and clear pacing. Limit to 3 paragraphs and include 2–3 clear choices the player can take next. End your thought fully — avoid trailing off."""
-    
+
     print("[DEBUG] Final prompt sent to AI:")
     print(prompt_to_send)
 
