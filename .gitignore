@@ -1,8 +1,8 @@
-# Virtual environments
+# Python virtual environments
 .venv/
 venv/
 
-# PyInstaller build
+# PyInstaller build artifacts
 build/
 dist/
 *.spec
@@ -10,6 +10,14 @@ dist/
 # Python cache
 __pycache__/
 
-# System
+# System files
 .DS_Store
+
+# Environment variables
 .env
+
+# Frontend (Next.js) .next build
+.next/
+
+# Static uploaded files (Flask uploads)
+static/uploads/

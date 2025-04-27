@@ -7,6 +7,7 @@ class Character(db.Model):
     role = db.Column(db.String(50))
     traits = db.Column(db.String(200))
     backstory = db.Column(db.Text)
+    image_url = db.Column(db.String(200))
 
     def to_dict(self):
         return {
@@ -16,4 +17,5 @@ class Character(db.Model):
             "role": self.role,
             "traits": self.traits,
             "backstory": self.backstory,
+            "image_url": self.image_url,
         }

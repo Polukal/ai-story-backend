@@ -2,8 +2,11 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.characters import Character
 from db import db
+import os
+from utils import file_upload
 
 character_bp = Blueprint("characters", __name__)
+UPLOAD_FOLDER = 'static/uploads/characters'
 
 @character_bp.route("/api/characters", methods=["GET"])
 @jwt_required()
@@ -16,14 +19,35 @@ def get_characters():
 @jwt_required()
 def create_character():
     user_id = get_jwt_identity()
-    data = request.json
+
+    name = request.form.get("name")
+    role = request.form.get("role")
+    traits = request.form.get("traits")
+    backstory = request.form.get("backstory")
+    image = request.files.get("image")
+
+    image_url = None
+    if image:
+        if not file_upload.allowed_file(image.filename):
+            return jsonify({"error": "Invalid file type. Only PNG, JPG, JPEG allowed."}), 400
+        if not file_upload.validate_file_size(image):
+            return jsonify({"error": "File too large. Max 5MB allowed."}), 400
+
+        filename = file_upload.generate_unique_filename(image.filename)
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        image.save(filepath)
+
+        file_upload.resize_image(filepath)
+        image_url = f"/{filepath}"
 
     character = Character(
         user_id=user_id,
-        name=data.get("name"),
-        role=data.get("role"),
-        traits=data.get("traits"),
-        backstory=data.get("backstory"),
+        name=name,
+        role=role,
+        traits=traits,
+        backstory=backstory,
+        image_url=image_url,
     )
 
     db.session.add(character)
@@ -36,11 +60,37 @@ def update_character(char_id):
     user_id = get_jwt_identity()
     character = Character.query.filter_by(id=char_id, user_id=user_id).first_or_404()
 
-    data = request.json
-    character.name = data.get("name", character.name)
-    character.role = data.get("role", character.role)
-    character.traits = data.get("traits", character.traits)
-    character.backstory = data.get("backstory", character.backstory)
+    name = request.form.get("name")
+    role = request.form.get("role")
+    traits = request.form.get("traits")
+    backstory = request.form.get("backstory")
+    image = request.files.get("image")
+
+    if name:
+        character.name = name
+    if role:
+        character.role = role
+    if traits:
+        character.traits = traits
+    if backstory:
+        character.backstory = backstory
+
+    if image:
+        if not file_upload.allowed_file(image.filename):
+            return jsonify({"error": "Invalid file type. Only PNG, JPG, JPEG allowed."}), 400
+        if not file_upload.validate_file_size(image):
+            return jsonify({"error": "File too large. Max 5MB allowed."}), 400
+
+        if character.image_url:
+            file_upload.delete_old_file(character.image_url)
+
+        filename = file_upload.generate_unique_filename(image.filename)
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        image.save(filepath)
+
+        file_upload.resize_image(filepath)
+        character.image_url = f"/{filepath}"
 
     db.session.commit()
     return jsonify(character.to_dict())
@@ -50,6 +100,9 @@ def update_character(char_id):
 def delete_character(char_id):
     user_id = get_jwt_identity()
     character = Character.query.filter_by(id=char_id, user_id=user_id).first_or_404()
+
+    if character.image_url:
+        file_upload.delete_old_file(character.image_url)
 
     db.session.delete(character)
     db.session.commit()

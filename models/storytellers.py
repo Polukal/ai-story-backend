@@ -8,6 +8,7 @@ class Storyteller(db.Model):
     tone = db.Column(db.String(50))
     plot_setup = db.Column(db.Text)
     visual_style = db.Column(db.String(50))
+    image_url = db.Column(db.String(200))
 
     def to_dict(self):
         return {
@@ -18,4 +19,5 @@ class Storyteller(db.Model):
             "tone": self.tone,
             "plot_setup": self.plot_setup,
             "visual_style": self.visual_style,
+            "image_url": self.image_url,
         }
